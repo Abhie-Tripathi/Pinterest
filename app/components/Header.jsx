@@ -28,11 +28,20 @@ const Header = () => {
       }
     }
 
+    const onCreateClick = () =>{
+      if(session){
+        router.push('/pin-builder')
+      }
+      else{
+        signIn()
+      }
+    }
+
   return (
     <div className='flex justify-between gap-3 md:gap-2 items-center p-6'>
-        <Image src='/logo.png' alt='logo' width={60} height={60} className='hover:bg-gray-300 p-2 rounded-full cursor-pointer'/>
+        <Image src='/logo.png' onClick={()=>router.push("/")} alt='logo' width={60} height={60} className='hover:bg-gray-300 p-2 rounded-full cursor-pointer'/>
         <button className='bg-black text-white rounded-full p-2 px-4 hidden md:block'>Home</button>
-        <button className='font-semibold p-2 px-4' onClick={()=>router.push('/pin-builder')}>Create</button>
+        <button className='font-semibold p-2 px-4' onClick={()=>onCreateClick()}>Create</button>
         <div className='bg-[#e9e9e9] p-3 hidden md:flex gap-3 items-center rounded-full w-full'>
             <HiSearch className='text-[32px] text-gray-500'/> 
             <input type='text' placeholder='Search' className='bg-transparent outline-none'/>
