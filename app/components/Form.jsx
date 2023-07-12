@@ -1,11 +1,13 @@
 "use client";
 import React, { useState } from "react";
+import Image from "next/image";
 import UserTag from "./UserTag";
 import UploadImage from "./UploadImage";
 import { useSession } from "next-auth/react";
-import {getDownloadURL, getStorage, ref, uploadBytes} from "firebase/storage"
-import app from "../Shared/firebaseConfig"
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
+import app from "../Shared/firebaseConfig";
 import { doc, getFirestore, setDoc } from "firebase/firestore";
+import { useRouter } from "next/navigation";
 
 const Form = () => {
   const { data: session } = useSession();
@@ -13,47 +15,69 @@ const Form = () => {
   const [desc, setDesc] = useState();
   const [link, setLink] = useState();
   const [file, setFile] = useState();
+  const [loading, setLoading] = useState(false);
 
-  const storage = getStorage(app)
-  const db = getFirestore(app)
-  const postId = Date.now().toString()
+  const router = useRouter()
 
-  const uploadFile = ()=>{
-    const storageRef = ref(storage, "pinterest/"+file.name)
-    uploadBytes(storageRef,file).then((snapshot)=>{
-        console.log("File is uploaded")
-    }).then((resp)=>{
-        getDownloadURL(storageRef).then(async(url)=>{
-            console.log(url)
-            const postData={
-                title:title,
-                desc:desc,
-                link:link,
-                image: url,
-                userName: session.user.name,
-                email: session.user.email,
-                userImage: session.user.image
+  const storage = getStorage(app);
+  const db = getFirestore(app);
+  const postId = Date.now().toString();
+
+  const uploadFile = () => {
+    setLoading(true);
+    const storageRef = ref(storage, "pinterest/" + file.name);
+    uploadBytes(storageRef, file)
+      .then((snapshot) => {
+        console.log("File is uploaded");
+      })
+      .then((resp) => {
+        getDownloadURL(storageRef).then(async (url) => {
+          console.log(url);
+          const postData = {
+            title: title,
+            desc: desc,
+            link: link,
+            image: url,
+            userName: session.user.name,
+            email: session.user.email,
+            userImage: session.user.image,
+            id: postId
+          };
+          await setDoc(doc(db, "pinterest-post", postId), postData).then(
+            (resp) => {
+              console.log("Data saved");
+              setLoading(false);
+              router.push("/"+session.user.email)
             }
-            await setDoc(doc(db, "pinterest-post", postId), postData).then(resp=>console.log("Data saved")) 
-        })
-    })
-  }
-
+          );
+        });
+      });
+  };
 
   return (
     <div className=" bg-white p-16 rounded-2xl ">
       <div className="flex justify-end mb-6">
         <button
-        onClick={()=>uploadFile()}
+          onClick={() => uploadFile()}
           className="bg-red-500 p-2
             text-white font-semibold px-3 
             rounded-lg"
         >
-          Save
+          {loading ? (
+            <Image
+              src="/loading-indicator.png"
+              width={30}
+              height={30}
+              alt="loading"
+              className="animate-spin"
+            />
+          ) : (
+            <span>Save</span>
+          )}
         </button>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        <UploadImage setFile={setFile}/>
+        <UploadImage setFile={setFile} />
 
         <div className="col-span-2">
           <div className="w-[100%]">
