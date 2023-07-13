@@ -2,7 +2,7 @@
 import React,{useEffect,useState} from "react"
 import app from "./Shared/firebaseConfig";
 import { getFirestore, collection, query, getDocs } from "firebase/firestore";
-import PinList from "./components/pins/PinList";
+import PinList from "./components/Pins/PinList";
 
 export default function Home() {
 
