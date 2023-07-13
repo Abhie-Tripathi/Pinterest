@@ -1,15 +1,15 @@
 import React from "react";
 import Image from "next/image";
-import { signOut, useSession } from "next-auth/react";
+import { auth } from "../Shared/firebaseConfig";
 import { useRouter } from "next/navigation";
 
 const UserInfo = ({ userInfo }) => {
   const router = useRouter();
-  const { data: session } = useSession();
+  const userData = auth.currentUser
 
   const onLogoutClick = () => {
     router.push("/");
-    signOut();
+    auth.signOut();
   };
 
   return (
@@ -27,7 +27,7 @@ const UserInfo = ({ userInfo }) => {
         <button className="bg-gray-200 p-2 px-3 rounded-full font-semibold mt-5">
           Share
         </button>
-        {session?.user.email == userInfo.email && (
+        {userData.email == userInfo.email && (
           <button
             onClick={() => onLogoutClick()}
             className="bg-gray-200 p-2 px-3 rounded-full font-semibold mt-5"

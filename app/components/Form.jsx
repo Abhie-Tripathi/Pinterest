@@ -3,14 +3,14 @@ import React, { useState } from "react";
 import Image from "next/image";
 import UserTag from "./UserTag";
 import UploadImage from "./UploadImage";
-import { useSession } from "next-auth/react";
+import {auth} from "../Shared/firebaseConfig"
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import app from "../Shared/firebaseConfig";
 import { doc, getFirestore, setDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 
 const Form = () => {
-  const { data: session } = useSession();
+  const userData = auth.currentUser
   const [title, setTitle] = useState();
   const [desc, setDesc] = useState();
   const [link, setLink] = useState();
@@ -38,16 +38,16 @@ const Form = () => {
             desc: desc,
             link: link,
             image: url,
-            userName: session.user.name,
-            email: session.user.email,
-            userImage: session.user.image,
+            userName: userData.displayName,
+            email: userData.email,
+            userImage: userData.photoURL,
             id: postId
           };
           await setDoc(doc(db, "pinterest-post", postId), postData).then(
             (resp) => {
               console.log("Data saved");
               setLoading(false);
-              router.push("/"+session.user.email)
+              router.push("/"+userData.email)
             }
           );
         });

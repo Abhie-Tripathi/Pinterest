@@ -1,35 +1,45 @@
 "use client"
 import Image from 'next/image'
-import React, { useEffect } from 'react'
+import React,{useState,useEffect} from 'react'
 import {HiSearch,HiBell,HiChat} from "react-icons/hi"
-import { useSession, signIn, signOut } from "next-auth/react"
-import app from "../Shared/firebaseConfig"
+import { signInWithPopup } from 'firebase/auth'
+import app, { auth, provider } from "../Shared/firebaseConfig"
 import {doc, getFirestore, setDoc} from "firebase/firestore"
 import { useRouter } from 'next/navigation'
 
 
 const Header = () => {
     const router = useRouter()
-    const { data: session } = useSession()
-    
+    const [user, setUser] = useState(null)
+
+    useEffect(() => {
+      auth.onAuthStateChanged((user) => {
+        setUser(user)
+      });
+    }, []);  
+
     const db = getFirestore(app)
 
-    useEffect(()=>{
-      saveUserInfo()
-    },[session])
 
-    const saveUserInfo = async()=>{
-      if(session?.user){
-        await setDoc(doc(db, "user", session.user.email), {
-          userName: session.user.name,
-          email: session.user.email,
-          userImage: session.user.image
-        })
+    const saveUserInfo = async(response)=>{
+      
+        // await setDoc(doc(db, "user", response.email), {
+        //   userName: response.displayName,
+        //   email: response.email,
+        //   userImage: response.photoURL
+        // })
+        console.log("user saved")
+        
       }
+    
+
+    const signIn = () =>{
+      signInWithPopup(auth,provider).then((response)=>saveUserInfo(response))
     }
 
+
     const onCreateClick = () =>{
-      if(session){
+      if(user){
         router.push('/pin-builder')
       }
       else{
@@ -49,8 +59,9 @@ const Header = () => {
         <HiSearch className='text-[25px] text-gray-500 md:hidden'/>
         <HiBell className='text-[25px] md:text-[50px] text-gray-500 cursor-pointer'/>
         <HiChat className='text-[25px] md:text-[50px] text-gray-500 cursor-pointer'/>
-        {session?.user?.image? <Image src={session.user.image} onClick={()=>router.push("/" + session.user.email)} alt='user-image' width={55} height={55} className='hover:bg-gray-300 p-2 rounded-full cursor-pointer'/>
-        : <button className='font-semibold p-2 px-4' onClick={() => signIn()}>Login</button>}
+        {user? <Image src={user.photoURL} onClick={()=>router.push("/"+ user.email)} alt='user-image' width={55} height={55} className='hover:bg-gray-300 p-2 rounded-full cursor-pointer'/>
+        :
+        <button className='font-semibold p-2 px-4' onClick={() => signIn()}>Login</button>}
             
     </div>
   )

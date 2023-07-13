@@ -1,23 +1,23 @@
 "use client"
 import React from 'react'
-import { useSession, signIn, signOut } from "next-auth/react"
+import {auth} from "../Shared/firebaseConfig"
 import Image from 'next/image';
 
 function UserTag() {
-    const {data:session}=useSession();
+    const userData = auth.currentUser
   return (
     <div className=''>
-       {session?
+       {userData?
        <div className='flex gap-3 
        items-center'>
-       <Image src={session.user.image} 
+       <Image src={userData.photoURL} 
        alt='userImage'
        width={45}
        height={45}
        className='rounded-full'/>
        <div>
-        <h2 className='text-[14px] font-medium'>{session.user.name}</h2>
-        <h2 className='text-[12px]'>{session.user.email}</h2>
+        <h2 className='text-[14px] font-medium'>{userData.displayName}</h2>
+        <h2 className='text-[12px]'>{userData.email}</h2>
 
         </div>
        </div>
